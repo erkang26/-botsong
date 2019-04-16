@@ -32,6 +32,7 @@ damages arising from the use of this software.
 #include <dirent.h>
 #include <assert.h>
 #include <execinfo.h>
+#include <strings.h>
 typedef char CHAR;
 typedef unsigned char BYTE;
 typedef short SHORT;
@@ -156,6 +157,7 @@ public:
 	static string getTimeString( time_t t = 0 );
 	static bool parseCmd( int argc, char** argv, map< string, string >& cmds );
 	static bool getFileContent( const string& file, string& content );
+	static int cmpNoCase( const string& left, const string& right );
 
 	template< typename T >
 	void swap( T& a, T& b )
