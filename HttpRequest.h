@@ -32,12 +32,15 @@ public:
 
 	void setBody( const string& body ) { _body = body; }
 
+	const string& getOriginUrl() const { return _originUrl; }
+
 private:
 	void makeRequest( string& data, const string& method );
 	void parseRequest( const string& url );
 	bool doRequest( const string& method );
 
 private:
+	string _originUrl;
 	SocketClient* _sock;
 	HttpResponse* _response;
 	map<string, string> _headers;

@@ -6,7 +6,7 @@
 #include "HttpRequest.h"
 #include "SocketClient.h"
 #include "HttpResponse.h"
-
+#include "cout.h"
 
 
 HttpRequest::HttpRequest()
@@ -32,12 +32,15 @@ HttpRequest::~HttpRequest()
 
 HttpResponse* HttpRequest::get( const string& url )
 {
+	_originUrl = url;
 	parseRequest( url );
 	addHeader( "Host", _host );
 	addHeader( "Accept", "*/*" );
 	addHeader( "User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3759.4 Safari/537.36" );
+	addHeader( "Connection", "close" );
 	if ( !doRequest( "GET" ) )
 	{
+		COUT<<"doRequest failed"<<ENDL;
 		return NULL;
 	}
 
@@ -72,7 +75,7 @@ void HttpRequest::makeRequest( string& data, const string& method )
 	data = method;
 	data += " ";
 	data += _uri;
-	data += " HTTP/1.1\r\n";
+	data.append( " HTTP/1.1\r\n" );
 	
 	for( map<string,string>::iterator itr = _headers.begin(); _headers.end() != itr; ++itr )
 	{
@@ -101,12 +104,12 @@ void HttpRequest::parseRequest( const string& url )
 	string tmp;
 	_ssl = true;
 	size_t pos = url.find( HTTPS_HEADER );
-	if ( 0 != pos )
+	if ( string::npos == pos )
 	{
 		_ssl = false;
 		pos = url.find( HTTP_HEADER );
 	}
-	if ( 0 == pos )
+	if ( string::npos != pos )
 	{
 		int len = 0;
 		if ( _ssl )
@@ -117,7 +120,7 @@ void HttpRequest::parseRequest( const string& url )
 		{
 			len = strlen(HTTP_HEADER);
 		}
-		tmp = url.substr( len, url.size()-len );
+		tmp = url.substr( pos+len, url.size()-len-pos );
 	}
 	else
 	{
@@ -134,6 +137,7 @@ void HttpRequest::parseRequest( const string& url )
 	{
 		_uri = tmp.substr( pos, tmp.size()-pos );
 		tmp = tmp.substr( 0, pos );
+		Utils::trimTail( _uri );
 	}
 
 	pos = tmp.find( ":" );
@@ -163,36 +167,43 @@ bool HttpRequest::doRequest( const string& method )
 		string data;
 		makeRequest( data, method );
 
-		//cout<<data<<endl;
+		COUT<<data<<ENDL;
 
 		_sock = new SocketClient;
 		if ( !_sock->connect( _host.data(), _port, _ssl ) )
 		{
+			COUT<<"connect failed"<<ENDL;
 			break;
 		}
 
 		if ( !_sock->send( (char*)data.data(), data.size() ) )
 		{
+			COUT<<"send failed"<<ENDL;
 			break;
 		}
 
 		char buf[1024] = {0};
 		string recvData;
 		bool e = false;
+		int contentLen = 0;
+		int leftLen = 0;
 		for ( ; ; )
 		{
 			int r = _sock->doRecv( buf, sizeof(buf) );
 			if ( r < 0 )
 			{
+				COUT<<"recv failed: "<<errno<<ENDL;
 				e = true;
 				break;
 			}
 			else if ( 0 == r )
 			{
+				COUT<<"remote closed"<<ENDL;
 				break;
 			}
 			else
 			{
+				COUT<<buf;
 				recvData.append( buf, r );
 			}
 			size_t pos = recvData.find( "\r\n\r\n" );
@@ -203,18 +214,47 @@ bool HttpRequest::doRequest( const string& method )
 				{
 					finder = "0\r\n\r\n";
 				}
+				else if ( string::npos != recvData.find( "Content-Length: " ) )
+				{
+					size_t tmpPos = recvData.find( "Content-Length: " );
+					size_t tmpPos2 = recvData.find( "\r\n", tmpPos );
+					if ( string::npos != tmpPos2 )
+					{
+						int l = tmpPos + strlen("Content-Length: " );
+						string tmpLen = recvData.substr( l, tmpPos2-l );
+						Utils::trimHead( Utils::trimTail( tmpLen ) );
+						if ( !tmpLen.empty() )
+						{
+							contentLen = atoi(tmpLen.data());
+							leftLen = contentLen;
+						}
+					}
+				}
 				else
 				{
 					finder = "\r\n\r\n";
 				}
-				pos = recvData.find( finder, pos+4 );
-				if ( string::npos != pos )
+				if ( contentLen > 0 )
 				{
-					//cout<<"pos2:"<<pos<<endl;
-					break;
+					pos += 4;
+					leftLen = contentLen - (recvData.size()-pos);
+					if ( leftLen <= 0 )
+					{
+						break;
+					}
+				}
+				else
+				{
+					pos = recvData.find( finder, pos+4 );
+					if ( string::npos != pos )
+					{
+						//cout<<"pos2:"<<pos<<endl;
+						break;
+					}
 				}
 			}
 		}
+		//COUT<<recvData<<ENDL;
 		if ( e )
 		{
 			break;

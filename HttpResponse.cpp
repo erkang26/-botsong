@@ -83,7 +83,7 @@ bool HttpResponse::parseBody( const string& body )
 				break;
 			}
 
-			string s = body.substr( n, m-n+1 );
+			string s = body.substr( n, m-n );
 			long l = strtol( s.data(), NULL, 16 );
 			//cout<<s<<endl;
 			//cout<<l<<endl;
@@ -91,7 +91,11 @@ bool HttpResponse::parseBody( const string& body )
 			{
 				break;
 			}
-
+			
+			if ( (m+2+l) > body.size() )
+			{
+				l = body.size() - m - 2;
+			}
 			_body.append( (char*)body.data()+m+2, l );
 			n = m+2+l+2;
 		}
@@ -126,4 +130,14 @@ void HttpResponse::parseFirstLine( const string& line )
 bool HttpResponse::hasHeader( const string& key )
 {
 	return ( _headers.end() != _headers.find(key) );
+}
+const string& HttpResponse::getHeader( const string& name )
+{
+	map< string, string >::iterator itr = _headers.find( name );
+	if ( _headers.end() != itr )
+	{
+		return itr->second;
+	}
+
+	return _empty;
 }

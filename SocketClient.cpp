@@ -5,6 +5,7 @@
 // Created by token.tong at 2019-04-15 10:08:39
 #include "SocketClient.h"
 #include "X509Cert.h"
+#include "cout.h"
 
 SocketClient::SocketClient()
 : _port(0)
@@ -73,14 +74,14 @@ bool SocketClient::connectNormal()
 		hostent* p = gethostbyname( _host.data() );
 		if ( NULL == p )
 		{
-			cout<<"gethostbyname error"<<endl;
+			COUT<<"gethostbyname error"<<ENDL;
 			break;
 		}
 
 		_sock = socket( AF_INET, SOCK_STREAM, 0 );
 		if ( INVALID_SOCK == _sock )
 		{
-			cout<<"socket error"<<endl;
+			COUT<<"socket error"<<ENDL;
 			break;
 		}
 
@@ -94,7 +95,7 @@ bool SocketClient::connectNormal()
 		int ret = ::connect( _sock, (sockaddr*)&addr, sizeof(addr) );
 		if ( SOCK_ERROR == ret )
 		{
-			cout<<"connect error"<<endl;
+			COUT<<"connect error"<<ENDL;
 			break;
 		}
 
@@ -123,7 +124,7 @@ bool SocketClient::connectSsl()
 		_ctx = SSL_CTX_new( SSLv23_client_method() );
 		if ( NULL == _ctx )
 		{
-			cout<<"ctx new failed"<<endl;
+			COUT<<"ctx new failed"<<ENDL;
 			break;
 		}
 
@@ -138,22 +139,22 @@ bool SocketClient::connectSsl()
 		if ( -1 == SSL_connect( _sslHandle ) )
 		{
 			unsigned long e = ERR_get_error();
-			cout<<ERR_error_string(e, NULL);
-			cout<<"ssl connect failed"<<endl;
+			COUT<<ERR_error_string(e, NULL);
+			COUT<<"ssl connect failed"<<ENDL;
 			break;
 		}
 
 		X509* c = SSL_get_peer_certificate( _sslHandle );
 		if ( NULL == c )
 		{
-			cout<<"no cert"<<endl;
+			COUT<<"no cert"<<ENDL;
 			break;
 		}
 
 		X509Cert* cert = X509Cert::parse( c );
 		if ( NULL == cert )
 		{
-			cout<<"parse cert failed"<<endl;
+			COUT<<"parse cert failed"<<ENDL;
 			break;
 		}
 
@@ -164,23 +165,7 @@ bool SocketClient::connectSsl()
 
 	ERR_print_errors_fp(stdout);
 
-	if ( NULL != _sslHandle )
-	{
-		SSL_shutdown( _sslHandle );
-		SSL_free( _sslHandle );
-		_sslHandle = NULL;
-	}
-
-	if ( NULL != _ctx )
-	{
-		SSL_CTX_free( _ctx );
-	}
-
-	if ( INVALID_SOCK != _sock )
-	{
-		::close( _sock );
-		_sock = INVALID_SOCK;
-	}
+	close();
 
 	return false;
 }
@@ -194,6 +179,7 @@ bool SocketClient::send( void* data, int len )
 		int ret = doSend( (char*)data, len );
 		if ( ret <= 0 )
 		{
+			COUT<<"send failed"<<ENDL;
 			return false;
 		}
 
@@ -201,6 +187,7 @@ bool SocketClient::send( void* data, int len )
 		sent += ret;
 	}
 
+	COUT<<"send success"<<ENDL;
 	return true;
 }
 bool SocketClient::recv( string& data, int len )
@@ -246,6 +233,7 @@ void SocketClient::close()
 	if ( NULL != _ctx )
 	{
 		SSL_CTX_free( _ctx );
+		_ctx = NULL;
 	}
 
 	if ( INVALID_SOCK != _sock )
@@ -302,7 +290,7 @@ int SocketClient::doRecv( void* data, int len )
 	if ( _ssl )
 	{
 		int ret = SSL_read( _sslHandle, (char*)data, len );
-		//cout<<ret<<endl;
+		//COUT<<ret<<ENDL;
 		if ( 0 != ret )
 		{
 			return ret;
@@ -315,12 +303,15 @@ int SocketClient::doRecv( void* data, int len )
 			}
 			else
 			{
+				COUT<<SSL_get_error( _sslHandle, ret )<<ENDL;
 				return -1;
 			}
 		}
 	}
 	else
 	{
-		return ::recv( _sock, (char*)data, len, 0 );
+		int r = ::recv( _sock, (char*)data, len, 0 );
+		COUT<<errno<<ENDL;
+		return r;
 	}
 }

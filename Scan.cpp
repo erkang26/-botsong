@@ -7,9 +7,12 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "UrlManager.h"
+#include "Stat.h"
 
 extern string IMG_DIR;
 extern string HTML_DIR;
+
+#define MIN_IMG_SIZE 10240
 
 Scan::Scan()
 {
@@ -41,17 +44,19 @@ void Scan::thread()
 	{
 		if ( mg->popImg( url ) )
 		{
-			cout<<"downloading image.."<<endl;
-			downloadImg( url );
-			cout<<"downloaded image"<<endl;
+			STAT_INCR( DownloadingImg );
+			downloadImg( mg, url );
+			STAT_DECR( DownloadingImg );
+			STAT_INCR( DownloadedImg );
 			continue;
 		}
 
 		if ( mg->popUrl( url ) )
 		{
-			cout<<"downloading web.."<<endl;
+			STAT_INCR( DownloadingUrl );
 			downloadWeb( mg, url );
-			cout<<"downloaded web"<<endl;
+			STAT_DECR( DownloadingUrl );
+			STAT_INCR( DownloadedUrl );
 			continue;
 		}
 
@@ -59,22 +64,38 @@ void Scan::thread()
 	}
 }
 
-void Scan::downloadImg( const string& url )
+void Scan::downloadImg( UrlManager* mg, const string& url )
 {
 	HttpRequest* rq = new HttpRequest;
 	HttpResponse* res = rq->get( url );
 
-	const string& data = res->getBody();
-	if ( data.size() > 1024 )
+	if ( NULL != res )
 	{
-		string filePath = IMG_DIR + "/" + getImageName( url );
-		ofstream fout( filePath.data(), ios::binary );
-		if ( fout.is_open() )
+		if ( 200 != res->getCode() )
 		{
-			fout.write( data.data(), data.size() );
-			fout.close();
+			COUT<<res->getCode()<<": "<<res->getRequest()->getOriginUrl()<<ENDL;
+			if ( 301 == res->getCode() && res->hasHeader( "Location" ) )
+			{
+				mg->addImg( res->getHeader( "Location" ) );
+			}
+		}
+		else
+		{
+			const string& data = res->getBody();
+			if ( data.size() >= MIN_IMG_SIZE )
+			{
+				string filePath = IMG_DIR + "/" + getImageName( url );
+				ofstream fout( filePath.data(), ios::binary );
+				if ( fout.is_open() )
+				{
+					fout.write( data.data(), data.size() );
+					fout.close();
+				}
+			}
 		}
 	}
+
+	delete rq;
 }
 
 void Scan::downloadWeb( UrlManager* mg, const string& url )
@@ -82,19 +103,30 @@ void Scan::downloadWeb( UrlManager* mg, const string& url )
 	HttpRequest* rq = new HttpRequest;
 	HttpResponse* res = rq->get( url );
 
-	string htmlFile = getFileByUrl( HTML_DIR, url );
-	htmlFile += ".html";
-	ofstream fout( htmlFile.data() );
-	if ( fout.is_open() )
-	{
-		fout<<res->getBody();
-		fout.close();
-	}
 
 	if ( NULL != res )
 	{
-		mg->parseWebUrl( url, res->getBody() );
-		mg->parseImgUrl( url, res->getBody() );
+		if ( 200 != res->getCode() )
+		{
+			COUT<<res->getCode()<<": "<<res->getRequest()->getOriginUrl()<<ENDL;
+			if ( 301 == res->getCode() && res->hasHeader( "Location" ) )
+			{
+				mg->addUrl( res->getHeader( "Location" ) );
+			}
+		}
+		else
+		{
+			string htmlFile = getFileByUrl( HTML_DIR, url );
+			htmlFile += ".html";
+			ofstream fout( htmlFile.data() );
+			if ( fout.is_open() )
+			{
+				fout<<res->getBody();
+				fout.close();
+			}
+			mg->parseWebUrl( url, res->getBody() );
+			mg->parseImgUrl( url, res->getBody() );
+		}
 	}
 	delete rq;
 }
@@ -129,6 +161,10 @@ string Scan::getImageName( string url )
 	char szTemp[50] = {0};
 	sprintf( szTemp, "%09ld", UrlManager::getInstance()->getNextSn() );
 	string file = szTemp;
+	if ( suffix.empty() )
+	{
+		suffix = ".jpg";
+	}
 	file += suffix;
 	return file;
 }

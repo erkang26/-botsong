@@ -25,11 +25,13 @@ public:
 
 	HttpRequest* getRequest() { return _request; }
 
+	bool hasHeader( const string& key );
+	const string& getHeader( const string& name );
+
 private:
 	bool parseHeader( const string& header );
 	bool parseBody( const string& body );
 	void parseFirstLine( const string& line );
-	bool hasHeader( const string& key );
 
 private:
 	HttpRequest *_request;
@@ -39,6 +41,7 @@ private:
 	int _code;
 	string _codeDesc;
 	vector<Cookie*> _cookies;
+	string _empty;
 };
 
 #endif //_HTTP_RESPONSE_H_
