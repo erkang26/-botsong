@@ -15,6 +15,8 @@ extern string HTML_DIR;
 #define MIN_IMG_SIZE 10240
 
 Scan::Scan()
+: _stop(true)
+, _stopped(true)
 {
 }
 
@@ -24,8 +26,8 @@ Scan::~Scan()
 
 void Scan::start()
 {
-	pthread_t tid;
-	pthread_create( &tid, NULL, threadEntry, this );
+	_stop = false;
+	pthread_create( &_tid, NULL, threadEntry, this );
 }
 
 void* Scan::threadEntry( void* p )
@@ -37,10 +39,11 @@ void* Scan::threadEntry( void* p )
 }
 void Scan::thread()
 {
+	_stopped = false;
 	UrlManager* mg = UrlManager::getInstance();
 
 	string url;
-	while( true )
+	while( !_stop )
 	{
 		if ( mg->popImg( url ) )
 		{
@@ -62,6 +65,8 @@ void Scan::thread()
 
 		sleep(1);
 	}
+
+	_stopped = true;
 }
 
 void Scan::downloadImg( UrlManager* mg, const string& url )
@@ -167,4 +172,19 @@ string Scan::getImageName( string url )
 	}
 	file += suffix;
 	return file;
+}
+
+void Scan::stop()
+{
+	_stop = true;
+}
+
+bool Scan::isStopped()
+{
+	return _stopped;
+}
+
+void Scan::waitForStopping()
+{
+	pthread_join( _tid, NULL );
 }

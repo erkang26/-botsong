@@ -3,6 +3,6 @@ botsong_SOURCES=main.cpp SocketClient.cpp X509Cert.cpp HttpRequest.cpp HttpRespo
 	    		UrlManager.cpp Scan.cpp Stat.cpp Counter.cpp cout.cpp
 
 INCLUDES = -I./include
-botsong_LDFLAGS=-L./lib -lutils -lssl -lcrypto -lhtml
+botsong_LDFLAGS=-L./lib -lutils -lssl -lcrypto
 
 AUTOMAKE_OPTIONS=foreign

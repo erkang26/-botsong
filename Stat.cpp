@@ -6,6 +6,8 @@
 #include "Stat.h"
 
 Stat::Stat()
+: _stop(true)
+, _stopped(true)
 {
 }
 
@@ -28,8 +30,8 @@ Stat* Stat::getInstance()
 
 void Stat::start()
 {
-	pthread_t tid;
-	pthread_create( &tid, NULL, threadEntry, this );
+	_stop = false;
+	pthread_create( &_tid, NULL, threadEntry, this );
 }
 
 void* Stat::threadEntry( void* p )
@@ -42,7 +44,8 @@ void* Stat::threadEntry( void* p )
 
 void Stat::thread()
 {
-	for ( ; ; )
+	_stopped = false;
+	while( !_stop )
 	{
 		cout<<endl;
 		cout<<"waiting url: "<<_waitingUrlCount.get()<<endl;
@@ -54,4 +57,18 @@ void Stat::thread()
 		cout<<endl;
 		sleep(10);
 	}
+
+	_stopped = true;
+}
+void Stat::stop()
+{
+	_stop = true;
+}
+bool Stat::isStopped()
+{
+	return _stopped;
+}
+void Stat::waitForStopping()
+{
+	pthread_join( _tid, NULL );
 }

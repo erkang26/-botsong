@@ -17,6 +17,9 @@ public:
 	~Scan();
 
 	void start();
+	void stop();
+	bool isStopped();
+	void waitForStopping();
 
 private:
 	static void* threadEntry( void* p );
@@ -27,6 +30,12 @@ private:
 
 	string getFileByUrl( const string& rootDir, const string& url );
 	string getImageName( string url );
+
+
+private:
+	pthread_t _tid;
+	bool _stop;
+	bool _stopped;
 };
 
 #endif //_SCAN_H_

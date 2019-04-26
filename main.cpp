@@ -75,7 +75,32 @@ int main( int argc, char** argv )
 		vScan.push_back(s);
 	}
 
-	sleep(86400*365);
+	for ( ; ; )
+	{
+		string input;
+		cin>>input;
+		if ( "exit" == input )
+		{
+			break;
+		}
+	}
+
+	cout<<"stopping.."<<endl;
+
+	Stat::getInstance()->stop();
+	for ( size_t i=0; i<vScan.size(); ++i )
+	{
+		vScan[i]->stop();
+	}
+	Stat::getInstance()->waitForStopping();
+	for ( size_t i=0; i<vScan.size(); ++i )
+	{
+		vScan[i]->waitForStopping();
+		delete vScan[i];
+	}
+	vScan.clear();
+
+	cout<<"stopped"<<endl;
 
 	return 0;
 }

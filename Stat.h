@@ -29,6 +29,10 @@ public:
 	Counter& getDownloadedUrlCount() { return _downloadedUrlCount; }
 	Counter& getDownloadedImgCount() { return _downloadedImgCount; }
 
+	void stop();
+	bool isStopped();
+	void waitForStopping();
+
 private:
 	static void* threadEntry( void * p );
 	void thread();
@@ -40,6 +44,10 @@ private:
 	Counter _downloadingImgCount;
 	Counter _downloadedUrlCount;
 	Counter _downloadedImgCount;
+
+	bool _stop;
+	bool _stopped;
+	pthread_t _tid;
 
 };
 
