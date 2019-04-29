@@ -5,6 +5,7 @@
 // Created by token.tong at 2019-04-28 16:59:09
 #include "NovBqgContent.h"
 #include "Url.h"
+#include "cout.h"
 
 NovBqgContent::NovBqgContent()
 {
@@ -57,7 +58,10 @@ void NovBqgContent::save( Url* url, const string& dir, const string& data )
 	{
 		strDir += "/";
 		strDir += arr[0];
-		mkdir( strDir.data(), 0777 );
+		if ( -1 == mkdir( strDir.data(), 0777 ) )
+		{
+			COUT<<"mkdir["<<strDir<<"] failed["<<errno<<"]"<<ENDL;
+		}
 	}
 	string title = url->getEx();
 	title = Utils::replace( title, " ", "_" );

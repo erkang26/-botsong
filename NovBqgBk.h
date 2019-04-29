@@ -19,8 +19,8 @@ public:
 	void save( Url* url, const string& dir, const string& data );
 
 private:
-	void parseBk( Url* parentUrl, const string& data );
-	void parsePg( Url* parentUrl, const string& data );
+	void parseBk( Url* parentUrl, const string& data, const string& charset );
+	void parsePg( Url* parentUrl, const string& data, const string& charset );
 };
 
 #endif //_NOV_BQG_BK_H_
