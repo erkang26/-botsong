@@ -8,11 +8,11 @@
 #include "HttpResponse.h"
 #include "UrlManager.h"
 #include "Stat.h"
+#include "UrlDelegate.h"
 
 extern string IMG_DIR;
 extern string HTML_DIR;
 
-#define MIN_IMG_SIZE 10240
 
 Scan::Scan()
 : _stop(true)
@@ -42,10 +42,10 @@ void Scan::thread()
 	_stopped = false;
 	UrlManager* mg = UrlManager::getInstance();
 
-	string url;
+	Url* url = NULL;
 	while( !_stop )
 	{
-		if ( mg->popImg( url ) )
+		if ( NULL != ( url = mg->popImg() ) )
 		{
 			STAT_INCR( DownloadingImg );
 			downloadImg( mg, url );
@@ -54,7 +54,7 @@ void Scan::thread()
 			continue;
 		}
 
-		if ( mg->popUrl( url ) )
+		if ( NULL != ( url = mg->popUrl() ) )
 		{
 			STAT_INCR( DownloadingUrl );
 			downloadWeb( mg, url );
@@ -69,10 +69,10 @@ void Scan::thread()
 	_stopped = true;
 }
 
-void Scan::downloadImg( UrlManager* mg, const string& url )
+void Scan::downloadImg( UrlManager* mg, Url* url )
 {
 	HttpRequest* rq = new HttpRequest;
-	HttpResponse* res = rq->get( url );
+	HttpResponse* res = rq->get( url->getUrl() );
 
 	if ( NULL != res )
 	{
@@ -81,32 +81,27 @@ void Scan::downloadImg( UrlManager* mg, const string& url )
 			COUT<<res->getCode()<<": "<<res->getRequest()->getOriginUrl()<<ENDL;
 			if ( 301 == res->getCode() && res->hasHeader( "Location" ) )
 			{
-				mg->addImg( res->getHeader( "Location" ) );
+				Url* o = new Url(*url);
+				o->setUrl( res->getHeader( "Location" ) );
+				mg->addImg( o );
 			}
 		}
 		else
 		{
-			const string& data = res->getBody();
-			if ( data.size() >= MIN_IMG_SIZE )
-			{
-				string filePath = IMG_DIR + "/" + getImageName( url );
-				ofstream fout( filePath.data(), ios::binary );
-				if ( fout.is_open() )
-				{
-					fout.write( data.data(), data.size() );
-					fout.close();
-				}
-			}
+			UrlDelegate* ud = UrlDelegate::getInstance( url->getFlag() );
+			string data = res->getBody();
+			data = ud->parseHtml( url, data );
+			ud->save( url, IMG_DIR, data );
 		}
 	}
 
 	delete rq;
 }
 
-void Scan::downloadWeb( UrlManager* mg, const string& url )
+void Scan::downloadWeb( UrlManager* mg, Url* url )
 {
 	HttpRequest* rq = new HttpRequest;
-	HttpResponse* res = rq->get( url );
+	HttpResponse* res = rq->get( url->getUrl() );
 
 
 	if ( NULL != res )
@@ -116,62 +111,20 @@ void Scan::downloadWeb( UrlManager* mg, const string& url )
 			COUT<<res->getCode()<<": "<<res->getRequest()->getOriginUrl()<<ENDL;
 			if ( 301 == res->getCode() && res->hasHeader( "Location" ) )
 			{
-				mg->addUrl( res->getHeader( "Location" ) );
+				Url* o = new Url(*url);
+				o->setUrl( res->getHeader( "Location" ) );
+				mg->addUrl( o );
 			}
 		}
 		else
 		{
-			string htmlFile = getFileByUrl( HTML_DIR, url );
-			htmlFile += ".html";
-			ofstream fout( htmlFile.data() );
-			if ( fout.is_open() )
-			{
-				fout<<res->getBody();
-				fout.close();
-			}
-			mg->parseWebUrl( url, res->getBody() );
-			mg->parseImgUrl( url, res->getBody() );
+			string data = res->getBody();
+			UrlDelegate* ud = UrlDelegate::getInstance( url->getFlag() );
+			data = ud->parseHtml( url, data );
+			ud->save( url, HTML_DIR, data );
 		}
 	}
 	delete rq;
-}
-
-string Scan::getFileByUrl( const string& rootDir, const string& url )
-{
-	string tmp = url;
-	if ( 0 == tmp.find( HTTP_HEADER ) )
-	{
-		tmp.erase( 0, HTTP_HEADER_SIZE );
-	}
-
-	Utils::trimAll( tmp );
-
-	string file = rootDir + "/" + tmp;
-
-	return file;
-}
-string Scan::getImageName( string url )
-{
-	size_t n = url.rfind( '.' );
-	string suffix;
-	if ( string::npos != n )
-	{
-		suffix = url.substr( n, url.size()-n );
-		if ( suffix.size() > 6 )
-		{
-			suffix.clear();
-		}
-	}
-
-	char szTemp[50] = {0};
-	sprintf( szTemp, "%09ld", UrlManager::getInstance()->getNextSn() );
-	string file = szTemp;
-	if ( suffix.empty() )
-	{
-		suffix = ".jpg";
-	}
-	file += suffix;
-	return file;
 }
 
 void Scan::stop()

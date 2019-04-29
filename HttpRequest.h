@@ -7,12 +7,7 @@
 #define _HTTP_REQUEST_H_
 #include "Utils.h"
 #include "sharelib.h"
-
-#define HTTP_HEADER "http://"
-#define HTTPS_HEADER "https://"
-
-#define HTTP_HEADER_SIZE 7
-#define HTTPS_HEADER_SIZE 8
+#include "Url.h"
 
 class SocketClient;
 class HttpResponse;

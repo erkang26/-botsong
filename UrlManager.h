@@ -8,20 +8,22 @@
 #include "Utils.h"
 #include "sharelib.h"
 #include "cout.h"
+#include "Locker.h"
+#include "TsMap.h"
+#include "TsList.h"
 
+class Url;
 class UrlManager
 {
 public:
 	~UrlManager();
 
 	static UrlManager* getInstance();
-	void parseWebUrl( const string& domainUrl, const string& data );
-	void parseImgUrl( const string& domainUrl, const string& data );
 
-	bool popUrl( string& url );
-	bool popImg( string& url );
-	void addUrl( const string& url );
-	void addImg( const string& url );
+	Url* popUrl();
+	Url* popImg();
+	void addUrl( Url* url );
+	void addImg( Url* url );
 
 	long getNextSn();
 
@@ -36,20 +38,14 @@ private:
 	UrlManager();
 
 	void init();
-	string getDomain( const string& url );
-	string getDomainWithDir( const string& url );
-	void formatUrl( const string& domain, const string& doaminWithDir, string& url );
 
 
 private:
-	map<string, bool> _mapUsedUrl;
-	list<string> _urlList;
-	list<string> _imgList;
+	TsMap _mapUsedUrl;
+	TsList _urlList;
+	TsList _imgList;
 
-	pthread_mutex_t _mapLocker;
-	pthread_mutex_t _urlLocker;
-	pthread_mutex_t _imgLocker;
-	pthread_mutex_t _snLocker;
+	Locker _snLocker;
 	long _sn;
 	string _sameSrc;
 	bool _debug;

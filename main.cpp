@@ -2,6 +2,8 @@
 #include "UrlManager.h"
 #include "Scan.h"
 #include "Stat.h"
+#include "UrlDelegate.h"
+#include "Url.h"
 using namespace std;
 
 string getDateTimeString();
@@ -16,7 +18,7 @@ int main( int argc, char** argv )
 	if ( argc < 2 )
 	{
 		cout<<"usage: botsong url [-s] [url] [url] ..."<<endl;
-		ifstream fin( "/Users/tongyifeng/workbench/botsong/master/20190425160918/index.html" );
+		ifstream fin( "/Users/tongyifeng/tmp/z.html" );
 		string s;
 		string tmp;
 		while( getline( fin, tmp ) )
@@ -24,10 +26,29 @@ int main( int argc, char** argv )
 			s += tmp;
 		}
 		fin.close();
+		Url* url = new Url();
+		UrlDelegate* o = UrlDelegate::getInstance( UT_NT_BQG_CONTENT );
+		string data = o->parseHtml( url, s );
+		cout<<data<<endl;
+		/*
 		cout<<s<<endl;
-		//string s = "<a href=/a/b.html>xxx</a><a href=/b/c.html x=d>dfds</a>";
 		UrlManager::getInstance()->parseWebUrl( "http://www.baidu.com", s );
 		UrlManager::getInstance()->print();
+		*/
+//		NovBase* nov = NovBase::getInstance( NT_BQG );
+		/*
+		string content = nov->parseContent( s );
+		cout<<content<<endl;
+		*/
+/*
+		map<string,string> mapUrl;
+		nov->parseList( s, mapUrl );
+		for( map<string,string>::iterator itr = mapUrl.begin();
+				mapUrl.end() != itr; ++itr )
+		{
+			cout<<itr->second<<": "<<itr->first<<endl;
+		}
+*/
 		return -1;
 	}
 	signal(SIGPIPE, SIG_IGN);
@@ -45,7 +66,10 @@ int main( int argc, char** argv )
 		}
 		else
 		{
-			mg->addUrl( argv[i] );
+			Url* url = new Url();
+			url->setUrl( argv[i] );
+			url->setFlag( UT_NT_BQG_BK );
+			mg->addUrl( url );
 		}
 	}
 

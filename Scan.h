@@ -8,6 +8,7 @@
 #include "Utils.h"
 #include "sharelib.h"
 
+class Url;
 class UrlManager;
 
 class Scan
@@ -25,11 +26,8 @@ private:
 	static void* threadEntry( void* p );
 	void thread();
 
-	void downloadImg( UrlManager* mg, const string& url );
-	void downloadWeb( UrlManager* mg, const string& url );
-
-	string getFileByUrl( const string& rootDir, const string& url );
-	string getImageName( string url );
+	void downloadImg( UrlManager* mg, Url* url );
+	void downloadWeb( UrlManager* mg, Url* url );
 
 
 private:
