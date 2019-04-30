@@ -35,10 +35,18 @@ public:
 	void addArr( const string& s ) { _arr.push_back(s); }
 	const vector<string>& getArr() const { return _arr; }
 
+	string serial();
+	bool load( const string& data );
+
 private:
 	string getDomain( const string& url );
 	string getDomainWithDir( const string& url );
 	string formatUrl( const string& domain, const string& domainWithDir, const string& url );
+
+	void reset();
+
+	bool load1_0( const vector<string>& v );
+
 
 private:
 	string _url;

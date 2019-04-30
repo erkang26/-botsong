@@ -5,6 +5,9 @@
 // Created by token.tong at 2019-04-28 14:23:46
 #include "Url.h"
 
+const char* SEPERATE_S = "__|,|__";
+const char* VER = "1.0";
+
 Url::Url()
 : _flag(UT_NONE)
 {
@@ -127,4 +130,77 @@ string Url::formatUrl( const string& domain, const string& domainWithDir, const 
 	}
 
 	return ret;
+}
+
+void Url::reset()
+{
+	_url.clear();
+	_flag = UT_NONE;
+	_ex.clear();
+	_arr.clear();
+}
+
+string Url::serial()
+{
+	string ret = VER;
+	ret += SEPERATE_S;
+	ret += _url;
+	ret += SEPERATE_S;
+
+	{
+		char buf[50] = {0};
+		sprintf( buf, "%d", _flag );
+		ret += buf;
+		ret += SEPERATE_S;
+	}
+
+	ret += _ex;
+	for ( size_t i=0; i<_arr.size(); ++i )
+	{
+		ret += SEPERATE_S;
+		ret += _arr[i];
+	}
+
+	return ret;
+}
+bool Url::load( const string& data )
+{
+	vector<string> v = Utils::split( data, SEPERATE_S );
+	if ( v.empty() )
+	{
+		return false;
+	}
+
+	if ( "1.0" == v[0] )
+	{
+		return load1_0(v);
+	}
+
+	return false;
+}
+
+bool Url::load1_0( const vector<string>& v )
+{
+	if ( v.size() < 4 )
+	{
+		return false;
+	}
+
+	_url = v[1];
+	_flag = UT_NONE;
+	if ( !v[2].empty() )
+	{
+		_flag = (URL_TYPE)atoi(v[2].data());
+	}
+	if ( UT_NONE == _flag )
+	{
+		return false;
+	}
+	_ex = v[3];
+	for ( size_t i=4; i<v.size(); ++i )
+	{
+		_arr.push_back(v[i]);
+	}
+
+	return true;
 }

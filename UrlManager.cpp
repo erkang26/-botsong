@@ -189,3 +189,92 @@ void UrlManager::setSameSource( const string& url )
 
 	cout<<"sameSrc: "<<_sameSrc<<endl;
 }
+
+void UrlManager::loadUrl( const string& path )
+{
+	ifstream fin(path.data());
+	if ( !fin.is_open() )
+	{
+		return ;
+	}
+
+	while( !fin.eof() )
+	{
+		string line;
+		fin>>line;
+
+		Url* url = new Url();
+		if ( url->load(line) )
+		{
+			addUrl(url);
+		}
+		else
+		{
+			delete url;
+			url = NULL;
+		}
+	}
+
+	fin.close();
+}
+void UrlManager::loadImg( const string& path )
+{
+	ifstream fin(path.data());
+	if ( !fin.is_open() )
+	{
+		return ;
+	}
+
+	while( !fin.eof() )
+	{
+		string line;
+		fin>>line;
+
+		Url* url = new Url();
+		if ( url->load(line) )
+		{
+			addImg(url);
+		}
+		else
+		{
+			delete url;
+			url = NULL;
+		}
+	}
+
+	fin.close();
+}
+bool UrlManager::saveUrl( const string& path )
+{
+	ofstream fout(path.data());
+	if ( !fout.is_open() )
+	{
+		return false;
+	}
+	vector<void*> v = _urlList.popAll();
+	for ( size_t i=0; i<v.size(); ++i )
+	{
+		Url* url = (Url*)v[i];
+		fout<<url->serial()<<endl;
+	}
+	fout.close();
+
+	return true;
+}
+bool UrlManager::saveImg( const string& path )
+{
+	ofstream fout(path.data());
+	if ( !fout.is_open() )
+	{
+		return false;
+	}
+	vector<void*> v = _imgList.popAll();
+	for ( size_t i=0; i<v.size(); ++i )
+	{
+		Url* url = (Url*)v[i];
+		fout<<url->serial()<<endl;
+	}
+	fout.close();
+
+	return true;
+}

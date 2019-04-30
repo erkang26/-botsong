@@ -8,6 +8,8 @@ using namespace std;
 
 string getDateTimeString();
 void createDir();
+void save();
+void load();
 
 string dateDir = getDateTimeString();
 string IMG_DIR = "img";
@@ -54,6 +56,8 @@ int main( int argc, char** argv )
 	signal(SIGPIPE, SIG_IGN);
 	UrlManager* mg = UrlManager::getInstance();
 	bool sameSrc = false;
+	Url* url = NULL;
+	bool loaded = false;
 	for ( int i=1; i<argc; ++i )
 	{
 		if ( 0 == strcmp( argv[i], "-s" ) )
@@ -64,13 +68,21 @@ int main( int argc, char** argv )
 		{
 			mg->setDebug(true);
 		}
+		else if ( 0 == strcmp( argv[i], "-l" ) )
+		{
+			load();
+			loaded = true;
+		}
 		else
 		{
-			Url* url = new Url();
+			url = new Url();
 			url->setUrl( argv[i] );
 			url->setFlag( UT_NT_BQG_BK );
-			mg->addUrl( url );
 		}
+	}
+	if ( !loaded && NULL != url )
+	{
+		mg->addUrl( url );
 	}
 
 	if ( sameSrc )
@@ -99,6 +111,7 @@ int main( int argc, char** argv )
 		vScan.push_back(s);
 	}
 
+	bool saving = false;
 	for ( ; ; )
 	{
 		string input;
@@ -107,22 +120,33 @@ int main( int argc, char** argv )
 		{
 			break;
 		}
+		else if ( "save" == input )
+		{
+			saving = true;
+			break;
+		}
 	}
 
 	cout<<"stopping.."<<endl;
 
-	Stat::getInstance()->stop();
 	for ( size_t i=0; i<vScan.size(); ++i )
 	{
 		vScan[i]->stop();
 	}
-	Stat::getInstance()->waitForStopping();
 	for ( size_t i=0; i<vScan.size(); ++i )
 	{
 		vScan[i]->waitForStopping();
 		delete vScan[i];
 	}
 	vScan.clear();
+
+	if ( saving )
+	{
+		save();
+	}
+
+	Stat::getInstance()->stop();
+	Stat::getInstance()->waitForStopping();
 
 	cout<<"stopped"<<endl;
 
@@ -157,4 +181,16 @@ string getDateTimeString()
 			t.tm_sec );
 
 	return string( szTime );
+}
+
+void save()
+{
+	UrlManager::getInstance()->saveUrl( "url.txt" );
+	UrlManager::getInstance()->saveImg( "img.txt" );
+}
+
+void load()
+{
+	UrlManager::getInstance()->loadUrl( "url.txt" );
+	UrlManager::getInstance()->loadImg( "img.txt" );
 }

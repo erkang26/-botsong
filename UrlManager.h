@@ -34,6 +34,11 @@ public:
 	void setDebug( bool debug ) { _debug = debug; }
 	bool isDebug() const { return _debug; }
 
+	void loadUrl( const string& path );
+	void loadImg( const string& path );
+	bool saveUrl( const string& path );
+	bool saveImg( const string& path );
+
 private:
 	UrlManager();
 

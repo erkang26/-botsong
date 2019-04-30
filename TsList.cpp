@@ -30,3 +30,16 @@ void* TsList::pop()
 
 	return p;
 }
+vector<void*> TsList::popAll()
+{
+	StackLock(_locker);
+	vector<void*> ret;
+	list<void*>::iterator itr = _list.begin();
+	for ( ; _list.end() != itr; ++itr )
+	{
+		ret.push_back(*itr);
+	}
+	_list.clear();
+
+	return ret;
+}

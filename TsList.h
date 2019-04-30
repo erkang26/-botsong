@@ -17,6 +17,7 @@ public:
 
 	void push(void* p);
 	void* pop();
+	vector<void*> popAll();
 	size_t size() const { return _list.size(); }
 	bool empty() const { return _list.empty(); }
 
