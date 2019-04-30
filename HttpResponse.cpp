@@ -18,6 +18,10 @@ HttpResponse::~HttpResponse()
 bool HttpResponse::parse( const string& data )
 {
 	size_t pos = data.find( "\r\n\r\n" );
+	if ( string::npos == pos )
+	{
+		return false;
+	}
 	string header = data.substr( 0, pos+2 );
 	parseHeader( header );
 
