@@ -5,6 +5,7 @@
 // Created by token.tong at 2019-04-17 09:53:44
 #include "Stat.h"
 
+
 Stat::Stat()
 : _stop(true)
 , _stopped(true)
@@ -44,6 +45,7 @@ void* Stat::threadEntry( void* p )
 
 void Stat::thread()
 {
+	const int SLEEP = 1;
 	_stopped = false;
 	while( !_stop )
 	{
@@ -55,7 +57,7 @@ void Stat::thread()
 		cout<<"downloaded url: "<<_downloadedUrlCount.get()<<endl;
 		cout<<"downloaded img: "<<_downloadedImgCount.get()<<endl;
 		cout<<endl;
-		sleep(10);
+		sleep(SLEEP);
 	}
 
 	_stopped = true;

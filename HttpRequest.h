@@ -29,6 +29,8 @@ public:
 
 	const string& getOriginUrl() const { return _originUrl; }
 
+	bool isTimeout() const { return _timeout; }
+
 private:
 	void makeRequest( string& data, const string& method );
 	void parseRequest( const string& url );
@@ -44,6 +46,7 @@ private:
 	WORD _port;
 	bool _ssl;
 	string _uri;
+	bool _timeout;
 };
 
 #endif //_HTTP_REQUEST_H_

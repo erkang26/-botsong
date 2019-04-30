@@ -26,6 +26,8 @@ public:
 	int doSend( void* data, int len );
 	int doRecv( void* data, int len );
 
+	bool isLastTimeout() const { return _lastTimeout; }
+
 private:
 	bool connectNormal();
 	bool connectSsl();
@@ -46,6 +48,8 @@ private:
 	char* _buf;
 	int _bufLen;
 	int _dataLen;
+
+	bool _lastTimeout;
 };
 
 #endif //_SOCKET_CLIENT_H_

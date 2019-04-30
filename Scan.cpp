@@ -94,6 +94,10 @@ void Scan::downloadImg( UrlManager* mg, Url* url )
 			ud->save( url, IMG_DIR, data );
 		}
 	}
+	else if ( rq->isTimeout() )
+	{
+		mg->addImg(url, true);
+	}
 
 	delete rq;
 }
@@ -124,6 +128,11 @@ void Scan::downloadWeb( UrlManager* mg, Url* url )
 			ud->save( url, HTML_DIR, data );
 		}
 	}
+	else if ( rq->isTimeout() )
+	{
+		mg->addUrl( url, true );
+	}
+
 	delete rq;
 }
 

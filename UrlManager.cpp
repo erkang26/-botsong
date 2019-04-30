@@ -71,7 +71,7 @@ Url* UrlManager::popImg()
 	return url;
 }
 
-void UrlManager::addUrl( Url* url )
+void UrlManager::addUrl( Url* url, bool force )
 {
 	if ( !_sameSrc.empty() )
 	{
@@ -81,9 +81,16 @@ void UrlManager::addUrl( Url* url )
 		}
 	}
 
-	if ( !_mapUsedUrl.setnx( url->getUrl(), url ) )
+	if ( !force )
 	{
-		return ;
+		if ( !_mapUsedUrl.setnx( url->getUrl(), url ) )
+		{
+			return ;
+		}
+	}
+	else
+	{
+		_mapUsedUrl.set( url->getUrl(), url );
 	}
 
 	_urlList.push(url);
@@ -91,11 +98,18 @@ void UrlManager::addUrl( Url* url )
 	STAT_INCR( WaitingUrl );
 }
 
-void UrlManager::addImg( Url* url )
+void UrlManager::addImg( Url* url, bool force )
 {
-	if ( !_mapUsedUrl.setnx( url->getUrl(), url ) )
+	if ( !force )
 	{
-		return ;
+		if ( !_mapUsedUrl.setnx( url->getUrl(), url ) )
+		{
+			return ;
+		}
+	}
+	else
+	{
+		_mapUsedUrl.set( url->getUrl(), url );
 	}
 
 	_imgList.push(url);

@@ -14,6 +14,7 @@ HttpRequest::HttpRequest()
 , _response(NULL)
 , _port(0)
 , _ssl(false)
+, _timeout(false)
 {
 }
 
@@ -192,6 +193,10 @@ bool HttpRequest::doRequest( const string& method )
 			int r = _sock->doRecv( buf, sizeof(buf) );
 			if ( r < 0 )
 			{
+				if ( _sock->isLastTimeout() )
+				{
+					_timeout = true;
+				}
 				COUT<<"recv failed: "<<errno<<ENDL;
 				e = true;
 				break;

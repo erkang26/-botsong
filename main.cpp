@@ -87,7 +87,7 @@ int main( int argc, char** argv )
 
 	createDir();
 
-	int threadNum = 10;
+	int threadNum = 20;
 
 	Stat::getInstance()->start();
 

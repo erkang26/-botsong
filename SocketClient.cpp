@@ -7,6 +7,8 @@
 #include "X509Cert.h"
 #include "cout.h"
 
+const int RECV_TIME_OUT = 60;
+
 SocketClient::SocketClient()
 : _port(0)
 , _ssl(false)
@@ -16,6 +18,7 @@ SocketClient::SocketClient()
 , _buf(NULL)
 , _bufLen(0)
 , _dataLen(0)
+, _lastTimeout(false)
 {
 }
 
@@ -98,6 +101,9 @@ bool SocketClient::connectNormal()
 			COUT<<"connect error"<<ENDL;
 			break;
 		}
+
+		timeval tv = { RECV_TIME_OUT, 0 };
+		setsockopt( _sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(tv) );
 
 		return true;
 	} while(0);
@@ -287,6 +293,7 @@ int SocketClient::doSend( void* data, int len )
 }
 int SocketClient::doRecv( void* data, int len )
 {
+	_lastTimeout = false;
 	if ( _ssl )
 	{
 		int ret = SSL_read( _sslHandle, (char*)data, len );
@@ -297,6 +304,7 @@ int SocketClient::doRecv( void* data, int len )
 		}
 		else
 		{
+			int err = errno;
 			if ( SSL_ERROR_ZERO_RETURN == SSL_get_error( _sslHandle, ret ) )
 			{
 				return 0;
@@ -304,6 +312,10 @@ int SocketClient::doRecv( void* data, int len )
 			else
 			{
 				COUT<<SSL_get_error( _sslHandle, ret )<<ENDL;
+				if ( EAGAIN == err )
+				{
+					_lastTimeout = true;
+				}
 				return -1;
 			}
 		}
@@ -311,6 +323,10 @@ int SocketClient::doRecv( void* data, int len )
 	else
 	{
 		int r = ::recv( _sock, (char*)data, len, 0 );
+		if ( EAGAIN == errno )
+		{
+			_lastTimeout = true;
+		}
 		COUT<<errno<<ENDL;
 		return r;
 	}

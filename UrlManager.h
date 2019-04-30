@@ -22,8 +22,8 @@ public:
 
 	Url* popUrl();
 	Url* popImg();
-	void addUrl( Url* url );
-	void addImg( Url* url );
+	void addUrl( Url* url, bool force = false );
+	void addImg( Url* url, bool force = false );
 
 	long getNextSn();
 
