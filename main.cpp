@@ -4,6 +4,9 @@
 #include "Stat.h"
 #include "UrlDelegate.h"
 #include "Url.h"
+#if KOS_TARGET == KOS_TARGET_LINUX
+#include <signal.h>
+#endif
 using namespace std;
 
 string getDateTimeString();

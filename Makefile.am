@@ -5,6 +5,6 @@ botsong_SOURCES=main.cpp SocketClient.cpp X509Cert.cpp HttpRequest.cpp HttpRespo
 				HtmlImage.cpp Url.cpp NovBqgBk.cpp
 
 INCLUDES = -I./include
-botsong_LDFLAGS=-L./lib -lutils -lssl -lcrypto -liconv
+botsong_LDADD=-L./lib -lssl -lcrypto -liconv -lpthread -lutils
 
 AUTOMAKE_OPTIONS=foreign

@@ -138,7 +138,7 @@ void HttpRequest::parseRequest( const string& url )
 	{
 		_uri = tmp.substr( pos, tmp.size()-pos );
 		tmp = tmp.substr( 0, pos );
-		Utils::trimTail( _uri );
+		Utils::trimTail( _uri, NULL );
 	}
 
 	pos = tmp.find( ":" );
@@ -227,7 +227,7 @@ bool HttpRequest::doRequest( const string& method )
 					{
 						int l = tmpPos + strlen("Content-Length: " );
 						string tmpLen = recvData.substr( l, tmpPos2-l );
-						Utils::trimHead( Utils::trimTail( tmpLen ) );
+						Utils::trimHead( Utils::trimTail( tmpLen, NULL ), NULL );
 						if ( !tmpLen.empty() )
 						{
 							contentLen = atoi(tmpLen.data());

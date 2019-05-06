@@ -15,3 +15,4 @@ rm -rf .deps
 rm -f *.php
 rm -f *.sql
 rm -f *.xml
+rm -f ./lib/*
