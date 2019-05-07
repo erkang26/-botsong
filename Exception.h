@@ -29,6 +29,7 @@ void exception_uninit();
 		}\
 		else\
 		{\
+			free(_env);\
 			char szBuf[1024] = {0};\
 			sprintf( szBuf, "%s:%d[%s]", __FILE__, __LINE__, __FUNCTION__ );\
 			string* call = new string(szBuf);\
@@ -50,6 +51,7 @@ void exception_uninit();
 		}\
 		else\
 		{\
+			free(_env);\
 			char szBuf[1024] = {0};\
 			sprintf( szBuf, "%s:%d[%s]", __FILE__, __LINE__, __FUNCTION__ );\
 			string* call = new string(szBuf);\
