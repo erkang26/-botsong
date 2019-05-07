@@ -37,6 +37,12 @@ void* TlsStack::pop()
 	Stack* st = (Stack*)pthread_getspecific( _key );
 	return st->pop();
 }
+void* TlsStack::top()
+{
+	lazy_init();
+	Stack* st = (Stack*)pthread_getspecific( _key );
+	return st->top();
+}
 bool TlsStack::empty()
 {
 	lazy_init();

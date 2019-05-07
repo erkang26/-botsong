@@ -9,11 +9,15 @@
 #include <setjmp.h>
 #include "TlsStack.h"
 
+typedef void (*exception_log_func)(const string&);
+
 extern TlsStack* _exception_stack;
 extern TlsStack* _exception_call_stack;
 
+extern exception_log_func exception_log;
+
 void _exception_sig_handler( int sig );
-void exception_init();
+void exception_init( exception_log_func func = NULL);
 void exception_uninit();
 
 #define __TRY\
@@ -24,16 +28,13 @@ void exception_uninit();
 		if ( 0 == sigsetjmp( *_env, 1 ) ) \
 		{
 #define __CATCH\
-			_exception_stack->pop();\
-			free(_env);\
+			sigjmp_buf* tmpEnv = (sigjmp_buf*)_exception_stack->pop();\
+			free(tmpEnv);\
 		}\
 		else\
 		{\
-			free(_env);\
-			char szBuf[1024] = {0};\
-			sprintf( szBuf, "%s:%d[%s]", __FILE__, __LINE__, __FUNCTION__ );\
-			string* call = new string(szBuf);\
-			_exception_call_stack->push(call);\
+			sigjmp_buf* tmpEnv = (sigjmp_buf*)_exception_stack->pop();\
+			free(tmpEnv);\
 			throw "error";\
 		}\
 	}\
@@ -46,26 +47,39 @@ void exception_uninit();
 		throw "error";\
 	}
 #define __FINALLY\
-			_exception_stack->pop();\
-			free(_env);\
+			sigjmp_buf* tmpEnv = (sigjmp_buf*)_exception_stack->pop();\
+			free(tmpEnv);\
 		}\
 		else\
 		{\
-			free(_env);\
-			char szBuf[1024] = {0};\
-			sprintf( szBuf, "%s:%d[%s]", __FILE__, __LINE__, __FUNCTION__ );\
-			string* call = new string(szBuf);\
-			_exception_call_stack->push(call);\
+			sigjmp_buf* tmpEnv = (sigjmp_buf*)_exception_stack->pop();\
+			free(tmpEnv);\
 			throw "error";\
 		}\
 	}\
 	catch( ... )\
 	{\
+		char szBuf[1024] = {0};\
+		sprintf( szBuf, "%s:%d[%s]", __FILE__, __LINE__, __FUNCTION__ );\
+		string* call = new string(szBuf);\
+		_exception_call_stack->push(call);\
 		string* s = NULL;\
+		if ( NULL != exception_log )\
+		{\
+			exception_log( "exception start" );\
+		}\
 		while( NULL != (s=(string*)_exception_call_stack->pop()) )\
 		{\
+			if ( NULL != exception_log )\
+			{\
+				exception_log(*s);\
+			}\
 			delete s;\
 			s = NULL;\
+		}\
+		if ( NULL != exception_log )\
+		{\
+			exception_log( "exception end" );\
 		}\
 	}
 

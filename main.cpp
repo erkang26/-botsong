@@ -14,6 +14,7 @@ string getDateTimeString();
 void createDir();
 void save();
 void load();
+void except_log( const string& data );
 
 string dateDir = getDateTimeString();
 string IMG_DIR = "img";
@@ -24,6 +25,18 @@ int main( int argc, char** argv )
 	if ( argc < 2 )
 	{
 		cout<<"usage: botsong url [-s] [url] [url] ..."<<endl;
+
+		exception_init( except_log );
+
+		__TRY
+
+			char* p = NULL;
+			
+			__TRY
+			*p = 1;
+			__CATCH
+
+		__FINALLY
 	/*
 		ifstream fin( "/Users/tongyifeng/tmp/z.html" );
 		string s;
@@ -59,7 +72,7 @@ int main( int argc, char** argv )
 */
 		return -1;
 	}
-	exception_init();
+	exception_init( except_log );
 	signal(SIGPIPE, SIG_IGN);
 	UrlManager* mg = UrlManager::getInstance();
 	bool sameSrc = false;
@@ -201,4 +214,16 @@ void load()
 {
 	UrlManager::getInstance()->loadUrl( "url.txt" );
 	UrlManager::getInstance()->loadImg( "img.txt" );
+}
+void except_log( const string& data )
+{
+	char szFileName[1024] = {0};
+	sprintf( szFileName, "exception_%lu.log", (unsigned long)pthread_self() );
+	FILE* fp = fopen( szFileName, "a+" );
+	if ( NULL != fp )
+	{
+		fprintf( fp, "%s\n", data.data() );
+		fflush(fp);
+		fclose(fp);
+	}
 }

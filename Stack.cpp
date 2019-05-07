@@ -29,6 +29,15 @@ void* Stack::pop()
 
 	return p;
 }
+void* Stack::top()
+{
+	if ( empty() )
+	{
+		return NULL;
+	}
+
+	return _stack.top();
+}
 bool Stack::empty()
 {
 	return _stack.empty();

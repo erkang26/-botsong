@@ -16,6 +16,7 @@ public:
 
 	void push( void* p );
 	void* pop();
+	void* top();
 	bool empty();
 	size_t size();
 
