@@ -4,6 +4,7 @@
 #include "Stat.h"
 #include "UrlDelegate.h"
 #include "Url.h"
+#include "Exception.h"
 #if KOS_TARGET == KOS_TARGET_LINUX
 #include <signal.h>
 #endif
@@ -58,6 +59,7 @@ int main( int argc, char** argv )
 */
 		return -1;
 	}
+	exception_init();
 	signal(SIGPIPE, SIG_IGN);
 	UrlManager* mg = UrlManager::getInstance();
 	bool sameSrc = false;
@@ -151,6 +153,8 @@ int main( int argc, char** argv )
 
 	Stat::getInstance()->stop();
 	Stat::getInstance()->waitForStopping();
+
+	exception_uninit();
 
 	cout<<"stopped"<<endl;
 

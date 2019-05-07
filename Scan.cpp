@@ -9,6 +9,7 @@
 #include "UrlManager.h"
 #include "Stat.h"
 #include "UrlDelegate.h"
+#include "Exception.h"
 
 extern string IMG_DIR;
 extern string HTML_DIR;
@@ -45,25 +46,39 @@ void Scan::thread()
 	Url* url = NULL;
 	while( !_stop )
 	{
-		if ( NULL != ( url = mg->popImg() ) )
-		{
-			STAT_INCR( DownloadingImg );
-			downloadImg( mg, url );
-			STAT_DECR( DownloadingImg );
-			STAT_INCR( DownloadedImg );
-			continue;
-		}
+		bool needSleep = false;
 
-		if ( NULL != ( url = mg->popUrl() ) )
+		__TRY
+		
+		do
 		{
-			STAT_INCR( DownloadingUrl );
-			downloadWeb( mg, url );
-			STAT_DECR( DownloadingUrl );
-			STAT_INCR( DownloadedUrl );
-			continue;
-		}
+			if ( NULL != ( url = mg->popImg() ) )
+			{
+				STAT_INCR( DownloadingImg );
+				downloadImg( mg, url );
+				STAT_DECR( DownloadingImg );
+				STAT_INCR( DownloadedImg );
+				break;
+			}
+	
+			if ( NULL != ( url = mg->popUrl() ) )
+			{
+				STAT_INCR( DownloadingUrl );
+				downloadWeb( mg, url );
+				STAT_DECR( DownloadingUrl );
+				STAT_INCR( DownloadedUrl );
+				break;
+			}
 
-		sleep(1);
+			needSleep = true;
+		} while(0);
+
+		__FINALLY
+
+		if ( needSleep )
+		{
+			sleep(1);
+		}
 	}
 
 	_stopped = true;
