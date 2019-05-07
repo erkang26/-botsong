@@ -168,6 +168,7 @@ bool Url::load( const string& data )
 	vector<string> v = Utils::split( data, SEPERATE_S );
 	if ( v.empty() )
 	{
+		cout<<"url empty"<<endl;
 		return false;
 	}
 
@@ -183,6 +184,7 @@ bool Url::load1_0( const vector<string>& v )
 {
 	if ( v.size() < 4 )
 	{
+		cout<<"size:"<<v.size()<<" error"<<endl;
 		return false;
 	}
 
@@ -194,6 +196,7 @@ bool Url::load1_0( const vector<string>& v )
 	}
 	if ( UT_NONE == _flag )
 	{
+		cout<<"flag:"<<_flag<<" error"<<endl;
 		return false;
 	}
 	_ex = v[3];

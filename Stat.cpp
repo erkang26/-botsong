@@ -49,6 +49,7 @@ void Stat::thread()
 	_stopped = false;
 	while( !_stop )
 	{
+		
 		cout<<endl;
 		cout<<"waiting url: "<<_waitingUrlCount.get()<<endl;
 		cout<<"waiting img: "<<_waitingImgCount.get()<<endl;
@@ -57,6 +58,7 @@ void Stat::thread()
 		cout<<"downloaded url: "<<_downloadedUrlCount.get()<<endl;
 		cout<<"downloaded img: "<<_downloadedImgCount.get()<<endl;
 		cout<<endl;
+		
 		sleep(SLEEP);
 	}
 

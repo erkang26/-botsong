@@ -195,13 +195,15 @@ void UrlManager::loadUrl( const string& path )
 	ifstream fin(path.data());
 	if ( !fin.is_open() )
 	{
+		cout<<"open file:"<<path<<" failed"<<endl;
 		return ;
 	}
 
 	while( !fin.eof() )
 	{
-		string line;
-		fin>>line;
+		char szLine[1024] = {0};
+		fin.getline( szLine, 1024 );
+		string line = szLine;
 
 		Url* url = new Url();
 		if ( url->load(line) )
@@ -210,6 +212,7 @@ void UrlManager::loadUrl( const string& path )
 		}
 		else
 		{
+			cout<<"load url:"<<line<<" failed"<<endl;
 			delete url;
 			url = NULL;
 		}
@@ -222,13 +225,15 @@ void UrlManager::loadImg( const string& path )
 	ifstream fin(path.data());
 	if ( !fin.is_open() )
 	{
+		cout<<"open file:"<<path<<" failed"<<endl;
 		return ;
 	}
 
 	while( !fin.eof() )
 	{
-		string line;
-		fin>>line;
+		char szLine[1024] = {0};
+		fin.getline( szLine, 1024 );
+		string line = szLine;
 
 		Url* url = new Url();
 		if ( url->load(line) )
@@ -237,6 +242,7 @@ void UrlManager::loadImg( const string& path )
 		}
 		else
 		{
+			cout<<"load img:"<<line<<" failed"<<endl;
 			delete url;
 			url = NULL;
 		}

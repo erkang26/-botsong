@@ -23,6 +23,7 @@ int main( int argc, char** argv )
 	if ( argc < 2 )
 	{
 		cout<<"usage: botsong url [-s] [url] [url] ..."<<endl;
+	/*
 		ifstream fin( "/Users/tongyifeng/tmp/z.html" );
 		string s;
 		string tmp;
@@ -35,6 +36,7 @@ int main( int argc, char** argv )
 		UrlDelegate* o = UrlDelegate::getInstance( UT_NT_BQG_CONTENT );
 		string data = o->parseHtml( url, s );
 		cout<<data<<endl;
+		*/
 		/*
 		cout<<s<<endl;
 		UrlManager::getInstance()->parseWebUrl( "http://www.baidu.com", s );
@@ -76,11 +78,17 @@ int main( int argc, char** argv )
 			load();
 			loaded = true;
 		}
-		else
+		else if ( 0 == strcmp( argv[i], "-bqg" ) )
 		{
 			url = new Url();
 			url->setUrl( argv[i] );
 			url->setFlag( UT_NT_BQG_BK );
+		}
+		else
+		{
+			url = new Url();
+			url->setUrl( argv[i] );
+			url->setFlag( UT_COMMON );
 		}
 	}
 	if ( !loaded && NULL != url )
@@ -88,16 +96,9 @@ int main( int argc, char** argv )
 		mg->addUrl( url );
 	}
 
-	if ( sameSrc )
+	if ( sameSrc && NULL != url )
 	{
-		for ( int i=1; i<argc; ++i )
-		{
-			if ( 0 != strcmp( argv[i], "-s" ) )
-			{
-				mg->setSameSource( argv[i] );
-				break;
-			}
-		}
+		mg->setSameSource( url->getUrl() );
 	}
 
 	createDir();
