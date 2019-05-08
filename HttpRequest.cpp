@@ -253,7 +253,6 @@ bool HttpRequest::doRequest( const string& method )
 					pos = recvData.find( finder, pos+4 );
 					if ( string::npos != pos )
 					{
-						//cout<<"pos2:"<<pos<<endl;
 						break;
 					}
 				}

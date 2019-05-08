@@ -48,7 +48,6 @@ private:
 	bool _stop;
 	bool _stopped;
 	pthread_t _tid;
-
 };
 
 #endif //_STAT_H_

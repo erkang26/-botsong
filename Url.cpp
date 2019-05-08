@@ -4,6 +4,7 @@
 //
 // Created by token.tong at 2019-04-28 14:23:46
 #include "Url.h"
+#include "cout.h"
 
 const char* SEPERATE_S = "__|,|__";
 const char* VER = "1.0";
@@ -168,7 +169,7 @@ bool Url::load( const string& data )
 	vector<string> v = Utils::split( data, SEPERATE_S );
 	if ( v.empty() )
 	{
-		cout<<"url empty"<<endl;
+		CERR<<"url empty"<<ENDL;
 		return false;
 	}
 
@@ -184,7 +185,7 @@ bool Url::load1_0( const vector<string>& v )
 {
 	if ( v.size() < 4 )
 	{
-		cout<<"size:"<<v.size()<<" error"<<endl;
+		CERR<<"size:"<<v.size()<<" error"<<ENDL;
 		return false;
 	}
 
@@ -196,7 +197,7 @@ bool Url::load1_0( const vector<string>& v )
 	}
 	if ( UT_NONE == _flag )
 	{
-		cout<<"flag:"<<_flag<<" error"<<endl;
+		CERR<<"flag:"<<_flag<<" error"<<ENDL;
 		return false;
 	}
 	_ex = v[3];

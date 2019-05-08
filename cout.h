@@ -15,7 +15,7 @@ struct Endl
 class Cout
 {
 public:
-	Cout();
+	Cout( const string& file, bool debug );
 	~Cout();
 
 	Cout& operator<<( bool b );
@@ -32,9 +32,23 @@ public:
 	Cout& operator<<( const char* s );
 	Cout& operator<<( const string& s );
 	Cout& operator<<( Endl& el );
+
+private:
+	bool canOutput();
+	void log( const string& data );
+
+private:
+	string _file;
+	string _dir;
+	bool _debug;
 };
 
 extern Cout COUT;
 extern Endl ENDL;
+extern Cout CERR;
+extern Cout CSTAT;
+extern Cout CRUN;
+extern Cout CEXCEPT;
+extern bool _need_daemon;
 
 #endif //_COUT_H_

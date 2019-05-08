@@ -4,7 +4,7 @@
 //
 // Created by token.tong at 2019-04-17 09:53:44
 #include "Stat.h"
-
+#include "cout.h"
 
 Stat::Stat()
 : _stop(true)
@@ -50,14 +50,14 @@ void Stat::thread()
 	while( !_stop )
 	{
 		
-		cout<<endl;
-		cout<<"waiting url: "<<_waitingUrlCount.get()<<endl;
-		cout<<"waiting img: "<<_waitingImgCount.get()<<endl;
-		cout<<"downloading url: "<<_downloadingUrlCount.get()<<endl;
-		cout<<"downloading img: "<<_downloadingImgCount.get()<<endl;
-		cout<<"downloaded url: "<<_downloadedUrlCount.get()<<endl;
-		cout<<"downloaded img: "<<_downloadedImgCount.get()<<endl;
-		cout<<endl;
+		CSTAT<<ENDL;
+		CSTAT<<"waiting url: "<<_waitingUrlCount.get()<<ENDL;
+		CSTAT<<"waiting img: "<<_waitingImgCount.get()<<ENDL;
+		CSTAT<<"downloading url: "<<_downloadingUrlCount.get()<<ENDL;
+		CSTAT<<"downloading img: "<<_downloadingImgCount.get()<<ENDL;
+		CSTAT<<"downloaded url: "<<_downloadedUrlCount.get()<<ENDL;
+		CSTAT<<"downloaded img: "<<_downloadedImgCount.get()<<ENDL;
+		CSTAT<<ENDL;
 		
 		sleep(SLEEP);
 	}

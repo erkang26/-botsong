@@ -4,6 +4,7 @@
 //
 // Created by token.tong at 2019-04-15 11:37:21
 #include "X509Cert.h"
+#include "cout.h"
 
 X509Cert::X509Cert()
 : _ver(0)
@@ -31,14 +32,14 @@ X509Cert* X509Cert::parse( X509* x )
 			bignum = ASN1_INTEGER_to_BN( asnInt, NULL );
 			if ( NULL == bignum )
 			{
-				cout<<"bignum error"<<endl;
+				CERR<<"bignum error"<<ENDL;
 				break;
 			}
 
 			sn = BN_bn2hex( bignum );
 			if ( NULL == sn )
 			{
-				cout<<"sn error"<<endl;
+				CERR<<"sn error"<<ENDL;
 				break;
 			}
 			
@@ -49,7 +50,7 @@ X509Cert* X509Cert::parse( X509* x )
 			X509_NAME* pName = X509_get_issuer_name( x );
 			if ( NULL == pName )
 			{
-				cout<<"issuer error"<<endl;
+				CERR<<"issuer error"<<ENDL;
 				break;
 			}
 			ct->_issuerName = X509_NAME_oneline( pName, NULL, 0 );
@@ -59,7 +60,7 @@ X509Cert* X509Cert::parse( X509* x )
 			X509_NAME* pName = X509_get_subject_name( x );
 			if ( NULL == pName )
 			{
-				cout<<"subject error"<<endl;
+				CERR<<"subject error"<<ENDL;
 				break;
 			}
 
@@ -95,8 +96,8 @@ FREE:
 
 void X509Cert::print()
 {
-	cout<<"ver:"<<_ver<<endl;
-	cout<<"sn:"<<_sn<<endl;
-	cout<<"issuer:"<<_issuerName<<endl;
-	cout<<"subject:"<<_userName<<endl;
+	CRUN<<"ver:"<<_ver<<ENDL;
+	CRUN<<"sn:"<<_sn<<ENDL;
+	CRUN<<"issuer:"<<_issuerName<<ENDL;
+	CRUN<<"subject:"<<_userName<<ENDL;
 }

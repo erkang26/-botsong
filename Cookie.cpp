@@ -4,6 +4,7 @@
 //
 // Created by token.tong at 2019-04-15 17:54:08
 #include "Cookie.h"
+#include "cout.h"
 
 Cookie::Cookie()
 : _secure(false)
@@ -85,37 +86,38 @@ void Cookie::transTime()
 
 void Cookie::print() const
 {
-	cout<<_name<<"="<<_value;
+	CRUN<<_name<<"="<<_value;
 	if ( !_expires.empty() )
 	{
-		cout<<"; Expires="<<_expires;
+		CRUN<<"; Expires="<<_expires;
 	}
 
 	if ( !_path.empty() )
 	{
-		cout<<"; Path="<<_path;
+		CRUN<<"; Path="<<_path;
 	}
 
 	if ( isSecure() )
 	{
-		cout<<"; SECURE";
+		CRUN<<"; SECURE";
 	}
 
 	if ( isHttpOnly() )
 	{
-		cout<<"; HttpOnly=true";
+		CRUN<<"; HttpOnly=true";
 	}
 
 	if ( getMaxAge() > 0 )
 	{
-		cout<<"; Max-Age="<<getMaxAge();
+		CRUN<<"; Max-Age="<<getMaxAge();
 	}
 
 	if ( !_domain.empty() )
 	{
-		cout<<"; Domain="<<_domain;
+		CRUN<<"; Domain="<<_domain;
 	}
 
-	cout<<"expiresTime="<<getExpiresTime();
-	cout<<endl;
+	CRUN<<"expiresTime="<<getExpiresTime();
+
+	CRUN<<ENDL;
 }

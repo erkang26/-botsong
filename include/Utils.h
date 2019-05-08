@@ -49,6 +49,8 @@ typedef unsigned long UINT64;
 typedef float FLOAT;
 typedef void VOID;
 
+typedef void (*log_func_t)(const string&);
+
 typedef int SOCK_T;
 #define SOCK_ERROR -1
 #define INVALID_SOCK -1

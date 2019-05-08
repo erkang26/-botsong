@@ -6,10 +6,20 @@
 #include "cout.h"
 #include "UrlManager.h"
 
-Cout COUT;
-Endl ENDL;
+extern string CUR_DIR;
 
-Cout::Cout()
+Cout COUT( "debug.log", true );
+Endl ENDL;
+Cout CERR( "error.log", false );
+Cout CSTAT( "stat.log", false );
+Cout CRUN( "run.log", false );
+Cout CEXCEPT( "exception.log", false );
+
+bool _need_daemon = false;
+
+Cout::Cout( const string& file, bool debug )
+: _file(file)
+, _debug(debug)
 {
 }
 
@@ -19,126 +29,173 @@ Cout::~Cout()
 
 Cout& Cout::operator<<( bool v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		log( v? "true" : "false" );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( char v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		char szBuf[4] = {0};
+		sprintf( szBuf, "%c", v );
+		log( szBuf );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( BYTE v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		char szBuf[4] = {0};
+		sprintf( szBuf, "%d", v );
+		log( szBuf );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( short v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		char szBuf[6] = {0};
+		sprintf( szBuf, "%d", v );
+		log( szBuf );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( WORD v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		char szBuf[6] = {0};
+		sprintf( szBuf, "%d", v );
+		log( szBuf );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( int v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		char szBuf[11] = {0};
+		sprintf( szBuf, "%d", v );
+		log( szBuf );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( DWORD v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		char szBuf[11] = {0};
+		sprintf( szBuf, "%u", v );
+		log( szBuf );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( long v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		char szBuf[21] = {0};
+		sprintf( szBuf, "%ld", v );
+		log( szBuf );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( ULONG v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		char szBuf[21] = {0};
+		sprintf( szBuf, "%lu", v );
+		log( szBuf );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( float v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		char szBuf[21] = {0};
+		sprintf( szBuf, "%f", v );
+		log( szBuf );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( double v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		char szBuf[21] = {0};
+		sprintf( szBuf, "%lf", v );
+		log( szBuf );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( const char* v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		log( v );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( const string& v )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<v;
+		log( v );
 	}
 	return *this;
 }
 
 Cout& Cout::operator<<( Endl& el )
 {
-	if ( UrlManager::getInstance()->isDebug() )
+	if ( canOutput() )
 	{
-		cout<<endl;
+		log( "\n" );
 	}
 	return *this;
+}
+
+bool Cout::canOutput()
+{
+	return ( !_debug || ( _debug && UrlManager::getInstance()->isDebug() ) );
+}
+void Cout::log( const string& data )
+{
+	if ( _need_daemon )
+	{
+		if ( _dir.empty() )
+		{
+			_dir = CUR_DIR;
+			_file = _dir + "/" + _file;
+		}
+		FILE* fp = fopen( _file.data(), "a+" );
+		if ( NULL != fp )
+		{
+			fprintf( fp, "%s", data.data() );
+			fflush(fp);
+			fclose(fp);
+		}
+	}
+	else
+	{
+		cout<<data;
+	}
 }

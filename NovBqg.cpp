@@ -5,6 +5,7 @@
 // Created by token.tong at 2019-04-28 09:24:08
 #include "NovBqg.h"
 #include "TsMap.h"
+#include "LogManager.h"
 
 NovBqg::NovBqg()
 : _mapUrl(NULL)
@@ -160,7 +161,7 @@ void NovBqg::save( const string& url, const string& dir, const string& data )
 	pos = url.find( "/", pos );
 	if ( string::npos == pos )
 	{
-		cout<<"NovBqg save url error:"<<url<<endl;
+		LogManager::error_log( "NovBqg save url error:" + url );
 		return ;
 	}
 	
@@ -169,7 +170,7 @@ void NovBqg::save( const string& url, const string& dir, const string& data )
 	string fileName;
 	if ( !_mapUrl->get( key, fileName ) )
 	{
-		cout<<"can not found url key:"<<key<<endl;
+		LogManager::error_log( "can not found url key:" + key );
 		return ;
 	}
 	fileName = Utils::replace( fileName, " ", "_" );

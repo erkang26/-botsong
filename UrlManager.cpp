@@ -6,6 +6,7 @@
 #include "UrlManager.h"
 #include "HttpRequest.h"
 #include "Stat.h"
+#include "cout.h"
 
 UrlManager::UrlManager()
 : _sn(0)
@@ -127,22 +128,22 @@ long UrlManager::getNextSn()
 
 void UrlManager::print()
 {
-	cout<<"url:"<<endl;
+	CRUN<<"url:"<<ENDL;
 	list<void*> urlList;
 	_urlList.copy(urlList);
 	for ( list<void*>::iterator itr = urlList.begin(); urlList.end() != itr; ++itr )
 	{
 		Url* url = (Url*)(*itr);
-		cout<<url->getUrl()<<endl;
+		CRUN<<url->getUrl()<<ENDL;
 	}
 
-	cout<<"img:"<<endl;
+	CRUN<<"img:"<<ENDL;
 	list<void*> imgList;
 	_imgList.copy(imgList);
 	for ( list<void*>::iterator itr = imgList.begin(); imgList.end() != itr; ++itr )
 	{
 		Url* url = (Url*)(*itr);
-		cout<<url->getUrl()<<endl;
+		CRUN<<url->getUrl()<<ENDL;
 	}
 }
 void UrlManager::setSameSource( const string& url )
@@ -187,7 +188,7 @@ void UrlManager::setSameSource( const string& url )
 		}
 	}
 
-	cout<<"sameSrc: "<<_sameSrc<<endl;
+	CRUN<<"sameSrc: "<<_sameSrc<<ENDL;
 }
 
 void UrlManager::loadUrl( const string& path )
@@ -195,7 +196,7 @@ void UrlManager::loadUrl( const string& path )
 	ifstream fin(path.data());
 	if ( !fin.is_open() )
 	{
-		cout<<"open file:"<<path<<" failed"<<endl;
+		CERR<<"open file:"<<path<<" failed"<<ENDL;
 		return ;
 	}
 
@@ -212,7 +213,7 @@ void UrlManager::loadUrl( const string& path )
 		}
 		else
 		{
-			cout<<"load url:"<<line<<" failed"<<endl;
+			CERR<<"load url:"<<" failed"<<ENDL;
 			delete url;
 			url = NULL;
 		}
@@ -225,7 +226,7 @@ void UrlManager::loadImg( const string& path )
 	ifstream fin(path.data());
 	if ( !fin.is_open() )
 	{
-		cout<<"open file:"<<path<<" failed"<<endl;
+		CERR<<"open file:"<<path<<" failed"<<ENDL;
 		return ;
 	}
 
@@ -242,7 +243,7 @@ void UrlManager::loadImg( const string& path )
 		}
 		else
 		{
-			cout<<"load img:"<<line<<" failed"<<endl;
+			CERR<<"load img:"<<line<<" failed"<<ENDL;
 			delete url;
 			url = NULL;
 		}

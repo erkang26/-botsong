@@ -33,3 +33,10 @@ void Counter::set( long count )
 	_count = count;
 	pthread_mutex_unlock( &_locker );
 }
+const string& Counter::getString()
+{
+	char szBuf[30] = {0};
+	sprintf( szBuf, "%ld", _count );
+	_s = szBuf;
+	return _s;
+}

@@ -5,6 +5,7 @@
 // Created by token.tong at 2019-04-15 15:57:46
 #include "HttpResponse.h"
 #include "Cookie.h"
+#include "cout.h"
 
 HttpResponse::HttpResponse( HttpRequest* request )
 : _request(request)
@@ -56,7 +57,7 @@ bool HttpResponse::parseHeader( const string& header )
 			Cookie* ck = new Cookie;
 			if ( !ck->parse( value ) )
 			{
-				cout<<"parse cookie failed:"<<value<<endl;
+				COUT<<"parse cookie failed:"<<value<<ENDL;
 				delete ck;
 			}
 			else
@@ -89,8 +90,6 @@ bool HttpResponse::parseBody( const string& body )
 
 			string s = body.substr( n, m-n );
 			long l = strtol( s.data(), NULL, 16 );
-			//cout<<s<<endl;
-			//cout<<l<<endl;
 			if ( 0 == l )
 			{
 				break;
@@ -109,15 +108,11 @@ bool HttpResponse::parseBody( const string& body )
 		_body = body;
 	}
 
-//	cout<<_body<<endl;
-//	cout<<endl<<endl<<endl;
-//	cout<<"__start__"<<endl;
-//	cout<<body<<endl;
+	COUT<<_body<<ENDL;
+	COUT<<ENDL<<ENDL<<ENDL;
+	COUT<<"__start__"<<ENDL;
+	COUT<<body<<ENDL;
 	
-//	ofstream fout( "2.html" );
-//	fout<<_body;
-//	fout.close();
-
 	return true;
 }
 

@@ -5,6 +5,7 @@
 // Created by token.tong at 2019-04-28 09:39:43
 #include "NovBase.h"
 #include "iconv.h"
+#include "cout.h"
 
 NovBase::NovBase()
 {
@@ -56,8 +57,8 @@ string NovBase::codeTrans( const string& charset, const string& data, const char
 	{
 		return data;
 	}
-	//cout<<data<<endl;
-	//cout<<data.size()<<endl;
+	COUT<<data<<ENDL;
+	COUT<<data.size()<<ENDL;
 	size_t inLen = data.size();
 	char* inBuf = (char*)data.data();
 	size_t outLen = inLen*10;
@@ -67,8 +68,8 @@ string NovBase::codeTrans( const string& charset, const string& data, const char
 	iconv_t cd = 0;
 	string ret = data;
 
-	//cout<<inLen<<endl;
-	//cout<<outLen<<endl;
+	COUT<<inLen<<ENDL;
+	COUT<<outLen<<ENDL;
 	do
 	{
 		if ( "gbk" == charset )
@@ -76,7 +77,7 @@ string NovBase::codeTrans( const string& charset, const string& data, const char
 			cd = iconv_open( "utf-8", "cp936");
 			if ( 0 == cd )
 			{
-				cout<<"open gbk to utf-8 failed"<<endl;
+				CERR<<"open gbk to utf-8 failed"<<ENDL;
 				break;
 			}
 		}
@@ -84,33 +85,19 @@ string NovBase::codeTrans( const string& charset, const string& data, const char
 		int n = 0;
 		if ( -1  == (n=iconv( cd, &inBuf, &inLen, &outBuf, &outLen )) )
 		{
-			//cout<<outLen<<endl;
-			//cout<<out<<endl;
-			cout<<"["<<charset<<"]iconv from gbk to utf-8 failed: "<<errno<<"("<<ex<<")"<<endl;
+			COUT<<outLen<<ENDL;
+			COUT<<out<<ENDL;
+			CERR<<"["<<charset<<"]iconv from gbk to utf-8 failed: "<<errno<<"("<<ex<<")"<<ENDL;
 			break;
 		}
 		outLen = strlen(out);
-		//cout<<outLen<<" - "<<n<<endl;
+		COUT<<outLen<<" - "<<n<<ENDL;
 
 		ret.clear();
 		ret.append( out, outLen );
 	} while(0);
-/*
-	int cnt = 0;
-	for ( size_t i=0; i<ret.size(); ++i )
-	{
-		if ( 0 == ret[i] )
-		{
-			cout<<i<<endl;
-			++cnt;
-			if ( cnt > 5 )
-			{
-				break;
-			}
-		}
-	}
-*/
-	//cout<<outLen<<endl;
+
+	COUT<<outLen<<ENDL;
 
 	if ( NULL != out )
 	{

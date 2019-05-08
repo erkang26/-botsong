@@ -9,15 +9,12 @@
 #include <setjmp.h>
 #include "TlsStack.h"
 
-typedef void (*exception_log_func)(const string&);
 
 extern TlsStack* _exception_stack;
 extern TlsStack* _exception_call_stack;
 
-extern exception_log_func exception_log;
-
 void _exception_sig_handler( int sig );
-void exception_init( exception_log_func func = NULL);
+void exception_init();
 void exception_uninit();
 
 #define __TRY\
@@ -64,23 +61,14 @@ void exception_uninit();
 		string* call = new string(szBuf);\
 		_exception_call_stack->push(call);\
 		string* s = NULL;\
-		if ( NULL != exception_log )\
-		{\
-			exception_log( "exception start" );\
-		}\
+		CEXCEPT<<"["<<pthread_self()<<"]exception start"<<ENDL;\
 		while( NULL != (s=(string*)_exception_call_stack->pop()) )\
 		{\
-			if ( NULL != exception_log )\
-			{\
-				exception_log(*s);\
-			}\
+			CEXCEPT<<"["<<pthread_self()<<"]"<<*s<<ENDL;\
 			delete s;\
 			s = NULL;\
 		}\
-		if ( NULL != exception_log )\
-		{\
-			exception_log( "exception end" );\
-		}\
+		CEXCEPT<<"["<<pthread_self()<<"]exception end"<<ENDL;\
 	}
 
 

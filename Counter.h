@@ -19,9 +19,11 @@ public:
 	void set( long count );
 
 	long get() const { return _count; }
+	const string& getString();
 
 private:
 	long _count;
+	string _s;
 	pthread_mutex_t _locker;
 };
 

@@ -7,7 +7,6 @@
 
 TlsStack* _exception_stack = NULL;
 TlsStack* _exception_call_stack = NULL;
-exception_log_func exception_log = NULL;
 
 void _exception_sig_handler( int sig )
 {
@@ -17,11 +16,10 @@ void _exception_sig_handler( int sig )
 		siglongjmp( *env, 1 );
 	}
 }
-void exception_init( exception_log_func func )
+void exception_init()
 {
 	_exception_stack = new TlsStack();
 	_exception_call_stack = new TlsStack();
-	exception_log = func;
 
 	struct sigaction act;
 	act.sa_handler = _exception_sig_handler;
@@ -36,6 +34,5 @@ void exception_uninit()
 	{
 		delete _exception_stack;
 		_exception_stack = NULL;
-		exception_log = NULL;
 	}
 }

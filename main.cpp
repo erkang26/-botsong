@@ -5,6 +5,7 @@
 #include "UrlDelegate.h"
 #include "Url.h"
 #include "Exception.h"
+#include "cout.h"
 #if KOS_TARGET == KOS_TARGET_LINUX
 #include <signal.h>
 #endif
@@ -14,19 +15,50 @@ string getDateTimeString();
 void createDir();
 void save();
 void load();
-void except_log( const string& data );
+void doDaemon();
+void _user1_sig_handler( int sig );
+void _user2_sig_handler( int sig );
+void regExit();
+void regSave();
 
 string dateDir = getDateTimeString();
 string IMG_DIR = "img";
 string HTML_DIR = "html";
+string CUR_DIR;
+string input;
 
 int main( int argc, char** argv )
 {
+	string dir = argv[0];
+	if ( '/'  != dir[0] )
+	{
+		if ( '.' == dir[0] )
+		{
+			dir.erase( 0, 1 );
+		}
+		char szBuf[1024] = {0};
+		char* p = getcwd( szBuf, sizeof(szBuf)-1 );
+		size_t pos = dir.rfind( '/' );
+		if ( string::npos == pos )
+		{
+			dir.clear();
+		}
+		else
+		{
+			dir = dir.substr( 0, pos );
+		}
+		if ( '/' != dir[0] )
+		{
+			dir = "/" + dir;
+		}
+		dir = p + dir;
+	}
+	CUR_DIR = dir;
 	if ( argc < 2 )
 	{
 		cout<<"usage: botsong url [-s] [url] [url] ..."<<endl;
 
-		exception_init( except_log );
+		exception_init();
 
 		__TRY
 
@@ -72,12 +104,13 @@ int main( int argc, char** argv )
 */
 		return -1;
 	}
-	exception_init( except_log );
+	exception_init();
 	signal(SIGPIPE, SIG_IGN);
 	UrlManager* mg = UrlManager::getInstance();
 	bool sameSrc = false;
 	Url* url = NULL;
 	bool loaded = false;
+	bool needDaemon = false;
 	for ( int i=1; i<argc; ++i )
 	{
 		if ( 0 == strcmp( argv[i], "-s" ) )
@@ -99,6 +132,10 @@ int main( int argc, char** argv )
 			url->setUrl( argv[i] );
 			url->setFlag( UT_NT_BQG_BK );
 		}
+		else if ( 0 == strcmp( argv[i], "-daemon" ) )
+		{
+			needDaemon = true;
+		}
 		else
 		{
 			url = new Url();
@@ -106,6 +143,14 @@ int main( int argc, char** argv )
 			url->setFlag( UT_COMMON );
 		}
 	}
+
+	_need_daemon = needDaemon;
+	if ( needDaemon )
+	{
+		doDaemon();
+	}
+	regExit();
+	regSave();
 	if ( !loaded && NULL != url )
 	{
 		mg->addUrl( url );
@@ -133,8 +178,6 @@ int main( int argc, char** argv )
 	bool saving = false;
 	for ( ; ; )
 	{
-		string input;
-		cin>>input;
 		if ( "exit" == input )
 		{
 			break;
@@ -144,9 +187,11 @@ int main( int argc, char** argv )
 			saving = true;
 			break;
 		}
+
+		sleep(1);
 	}
 
-	cout<<"stopping.."<<endl;
+	CRUN<<"stopping.."<<ENDL;
 
 	for ( size_t i=0; i<vScan.size(); ++i )
 	{
@@ -169,14 +214,14 @@ int main( int argc, char** argv )
 
 	exception_uninit();
 
-	cout<<"stopped"<<endl;
+	CRUN<<"stopped"<<ENDL;
 
 	return 0;
 }
 
 void createDir()
 {
-	string rootDir = "./" + dateDir;
+	string rootDir = CUR_DIR + "/" + dateDir;
 	mkdir( rootDir.data(), 0777 );
 
 	IMG_DIR = rootDir + "/" + IMG_DIR;
@@ -215,15 +260,46 @@ void load()
 	UrlManager::getInstance()->loadUrl( "url.txt" );
 	UrlManager::getInstance()->loadImg( "img.txt" );
 }
-void except_log( const string& data )
+void doDaemon()
 {
-	char szFileName[1024] = {0};
-	sprintf( szFileName, "exception_%lu.log", (unsigned long)pthread_self() );
-	FILE* fp = fopen( szFileName, "a+" );
-	if ( NULL != fp )
+	umask(0);
+	int pid = fork();
+	if ( 0 != pid )
 	{
-		fprintf( fp, "%s\n", data.data() );
-		fflush(fp);
-		fclose(fp);
+		exit(0);
 	}
+
+	//setsid();
+
+	struct sigaction sa;
+	sa.sa_handler = SIG_IGN;
+	sigemptyset( &sa.sa_mask );
+	sa.sa_flags = 0;
+	sigaction( SIGHUP, &sa, NULL );
+}
+
+void regExit()
+{
+	struct sigaction sa;
+	sa.sa_handler = _user1_sig_handler;
+	sigemptyset( &sa.sa_mask );
+	sa.sa_flags = 0;
+	sigaction( SIGUSR1, &sa, NULL );
+}
+void regSave()
+{
+	struct sigaction sa;
+	sa.sa_handler = _user2_sig_handler;
+	sigemptyset( &sa.sa_mask );
+	sa.sa_flags = 0;
+	sigaction( SIGUSR2, &sa, NULL );
+}
+
+void _user1_sig_handler( int sig )
+{
+	input = "exit";
+}
+void _user2_sig_handler( int sig )
+{
+	input = "save";
 }
